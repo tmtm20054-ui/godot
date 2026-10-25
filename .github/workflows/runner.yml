@@ -9,4 +9,3 @@ jobs:
   android-build:
     name: 🤖 Android
     uses: ./.github/workflows/android_builds.yml
-    secrets: inherit
