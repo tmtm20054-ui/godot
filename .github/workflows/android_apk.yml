@@ -1,0 +1,42 @@
+name: Android Editor APK
+on:
+  workflow_dispatch:
+
+env:
+  SCONS_FLAGS: >-
+    dev_mode=yes
+    module_text_server_fb_enabled=yes
+
+jobs:
+  build-android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: ./.github/actions/godot-deps
+
+      - name: Compilation
+        uses: ./.github/actions/godot-build
+        with:
+          scons-flags: ${{ env.SCONS_FLAGS }} arch=arm64 production=yes
+          platform: android
+          target: editor
+
+      - name: Generate Godot editor
+        run: |
+          cd platform/android/java
+          ./gradlew generateGodotEditor
+          ls -l ../../../bin/android_editor_builds/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-editor-apk
+          path: bin/android_editor_builds/*.apk
